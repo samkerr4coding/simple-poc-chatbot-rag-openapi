@@ -1,0 +1,11 @@
+langchain
+langchain-community
+langchain-openai
+openai
+nbconvert
+python-dotenv==1.0.0
+chainlit
+uvicorn==0.25.0
+Flask==3.0.1
+flask-swagger-ui
+flask_restx
