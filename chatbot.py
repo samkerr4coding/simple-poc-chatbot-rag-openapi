@@ -1,15 +1,15 @@
-import io
 import json
+import os
+from collections.abc import Sequence
 
 import chainlit as cl
 import requests
-import yaml
 from dotenv import load_dotenv
 from langchain.chains.llm import LLMChain
 from langchain.memory import ConversationBufferMemory
 from langchain_community.agent_toolkits.openapi import planner
+from langchain_community.agent_toolkits.openapi.planner import Operation
 from langchain_community.agent_toolkits.openapi.spec import reduce_openapi_spec
-from langchain_community.chat_models import ChatOpenAI
 from langchain_community.utilities import RequestsWrapper
 from langchain_openai import AzureChatOpenAI
 
@@ -46,9 +46,15 @@ def setup_multiple_chains():
     reduced_spec = reduce_openapi_spec(spec)
 
     llm = AzureChatOpenAI(
-        azure_deployment="<YOUR AZURE DEPLOYEMENT NAME>",  # Replace with your custom LLM URL
-        api_version="<YOUR API VERSION>"
+     azure_deployment=os.environ.get('AZURE_OPENAI_DEPLOYEMENT_NAME'),  # Replace with your custom LLM URL
+     api_version=os.environ.get('AZURE_OPENAI_API_VERSION')
     )
+
+    # llm = ChatOpenAI(
+    #     openai_api_key="no token",
+    #     model_name="TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF",
+    #     openai_api_base="http://localhost:1234/v1"  # Replace with your custom LLM URL
+    # )
 
     conversation_memory = ConversationBufferMemory(memory_key="chat_history",
                                                    max_len=200,
@@ -58,11 +64,16 @@ def setup_multiple_chains():
     cl.user_session.set("llm_chain", llm_chain)
 
     requests_wrapper = RequestsWrapper(headers=None)
+
+    # Create a sequence of allowed operations
+    allowed_operations: Sequence[Operation] = ("GET", "POST", "DELETE", "PUT")
+
     agent = planner.create_openapi_agent(
-        reduced_spec,
-        requests_wrapper,
-        llm,
+        api_spec=reduced_spec,
+        requests_wrapper= requests_wrapper,
+        llm=llm,
         allow_dangerous_requests=True,
+        allowed_operations=allowed_operations
     )
 
     cl.user_session.set("agent", agent)

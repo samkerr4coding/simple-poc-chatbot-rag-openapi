@@ -1,7 +1,5 @@
-import json
-from flask import Flask, Response, jsonify
+from flask import Flask, Response
 from flask_restx import Api, Resource, fields
-import yaml
 
 from api_docs import customer_api_docs
 
@@ -24,7 +22,7 @@ customers = {}
 # Endpoint to serve OpenAPI JSON
 @app.route('/openapi.json')
 def get_openapi_json():
-    return customer_api_docs
+    return Response(customer_api_docs, mimetype='application/json')
 
 @ns.route('/')
 class CustomerList(Resource):
