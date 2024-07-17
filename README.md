@@ -62,7 +62,7 @@ The Customer management's API will be accessible at http://localhost:5000/{endpo
 Make sure the fictional store's application is running before running the chatbot. To run Scoopsie, 
 simply execute the `chatbot.py` script:
    ```bash
-   chainlit run chatbot.py -w --port 8000
+   chainlit run customerbot.py -w --port 8000
 ```
 
 To run the chatbot application, navigate to  http://localhost:8000

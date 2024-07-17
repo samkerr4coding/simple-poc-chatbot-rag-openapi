@@ -21,7 +21,7 @@ customer_api_docs = None
 
 
 @cl.on_chat_start
-def setup_multiple_chains():
+def setup_llm_chain_and_agent():
     # Load and parse the OpenAPI Spec
     openapi_url = 'http://localhost:5000/openapi.json'
     response = requests.get(openapi_url)
