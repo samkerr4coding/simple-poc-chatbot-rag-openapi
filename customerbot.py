@@ -41,10 +41,6 @@ def setup_llm_chain_and_agent():
     else:
         print(f"Failed to fetch OpenAPI JSON content. Status code: {response.status_code}")
 
-    with open('openapi.json', 'r') as f:
-        spec = json.load(f)
-    reduced_spec = reduce_openapi_spec(spec)
-
     llm = AzureChatOpenAI(
      azure_deployment=os.environ.get('AZURE_OPENAI_DEPLOYEMENT_NAME'),  # Replace with your custom LLM URL
      api_version=os.environ.get('AZURE_OPENAI_API_VERSION')
@@ -62,6 +58,11 @@ def setup_llm_chain_and_agent():
                                                    )
     llm_chain = LLMChain(llm=llm, prompt=assistant_prompt, memory=conversation_memory)
     cl.user_session.set("llm_chain", llm_chain)
+
+
+    with open('openapi.json', 'r') as f:
+        spec = json.load(f)
+    reduced_spec = reduce_openapi_spec(spec)
 
     requests_wrapper = RequestsWrapper(headers=None)
 
@@ -85,7 +86,11 @@ async def handle_message(message: cl.Message):
     llm_chain = cl.user_session.get("llm_chain")
     agent = cl.user_session.get("agent")
 
-    if any(keyword in user_message for keyword in ["customer", "customers"]):
+    if (any(keyword in user_message for keyword in ["customer", "customers", "all the customers"])
+            and any(keyword in user_message for keyword in ["create", "add", "insert",
+                                                            "modify", "change", "update",
+                                                            "delete", "remove"
+                                                            "list"])):
         # If any of the keywords are in the user_message, use api_chain
         response = await agent.ainvoke(user_message,
                                          callbacks=[cl.AsyncLangchainCallbackHandler()])
